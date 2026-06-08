@@ -10,5 +10,6 @@ public class CartItemResponseDtoList {
     private long productId;
     private String productName;
     private BigDecimal price;
-    private Integer numberOfItemsSelected;
+    private Integer quantity;
+    private BigDecimal total;
 }

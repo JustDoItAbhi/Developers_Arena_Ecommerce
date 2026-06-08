@@ -7,8 +7,9 @@ import java.util.List;
 
 @Data
 public class CartResponseDto {
+    private String userEmail;
     private long cartID;
-    private List<CartItemResponseDtoList>responseDtoLists;
+    private List<CartItemResponseDtoList>cartItems;
     private BigDecimal TotalPrice;
-    private Integer TotalNumberOfItemsSelected;
+    private Integer totalQuantity;
 }

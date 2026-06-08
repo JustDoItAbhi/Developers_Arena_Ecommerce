@@ -9,8 +9,9 @@ import java.util.List;
 
 @Data
 @Entity
-@Table(name = "cart")
+@Table(name = "carts")
 public class Cart extends BaseModel {
+    private String userEmail;
     @OneToMany(mappedBy = "cart",fetch = FetchType.LAZY,cascade = CascadeType.ALL,orphanRemoval = true)
     private List<CartItem>cartItems;
     private BigDecimal totalPrice;

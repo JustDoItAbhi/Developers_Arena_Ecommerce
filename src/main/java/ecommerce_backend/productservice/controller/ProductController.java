@@ -23,7 +23,7 @@ public class ProductController {
 
     @PostMapping
     @TrackPerformance
-    @RateLimit(value = 2,duration = 60000)
+    @RateLimit(value = 50,duration = 60000)
     public ResponseEntity<ProductResponseDTO> createProduct(@Valid @RequestBody ProductDTO productDTO) {
         ProductResponseDTO createdProduct = productService.createProduct(productDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdProduct);
@@ -31,7 +31,7 @@ public class ProductController {
 
     @GetMapping
     @TrackPerformance
-    @RateLimit(value = 2,duration = 60000)
+    @RateLimit(value = 50,duration = 60000)
     public ResponseEntity<List<ProductResponseDTO>> getAllProducts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -41,12 +41,14 @@ public class ProductController {
 
     @GetMapping("/{id}")
     @TrackPerformance
+    @RateLimit(value = 50,duration = 60000)
     public ResponseEntity<ProductResponseDTO> getProductById(@PathVariable Long id) {
         ProductResponseDTO product = productService.getProductById(id);
         return ResponseEntity.ok(product);
     }
     @PutMapping("/{id}")
     @TrackPerformance
+    @RateLimit(value = 50,duration = 60000)
     public ResponseEntity<ProductResponseDTO> update(@PathVariable("id")Long id,
                                                      @RequestBody ProductDTO dto){
         ProductResponseDTO dto1=productService.update(id,dto);
@@ -54,6 +56,7 @@ public class ProductController {
     }
     @DeleteMapping("/{id}")
     @TrackPerformance
+    @RateLimit(value = 50,duration = 60000)
     public ResponseEntity<Boolean> deleteById(@PathVariable("id")Long id){
         boolean result=productService.deleteProduct(id);
         return ResponseEntity.ok(result);

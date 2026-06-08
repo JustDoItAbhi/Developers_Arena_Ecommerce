@@ -12,16 +12,13 @@ import java.math.BigDecimal;
 public class CartItem extends BaseModel {
 
     private Long productId;
-
     private String productName;
-
     private BigDecimal price;
-
-    private Integer stock;
-
-    private Integer quantity;
-
+    private Integer quantity=0;
+    private BigDecimal total=BigDecimal.ZERO;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id")
     private Cart cart;
+
 }
+

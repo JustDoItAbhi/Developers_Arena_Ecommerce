@@ -1,0 +1,157 @@
+package ecommerce_backend.orderservice.service;
+
+import ecommerce_backend.cartservice.cartrepository.CartItemRepository;
+import ecommerce_backend.cartservice.cartrepository.CartRepository;
+import ecommerce_backend.cartservice.entity.Cart;
+import ecommerce_backend.cartservice.entity.CartItem;
+import ecommerce_backend.categoryservice.exceptions.UserNotFoundException;
+import ecommerce_backend.orderservice.OrderRepository;
+import ecommerce_backend.orderservice.dto.OrderRequestDto;
+import ecommerce_backend.orderservice.dto.OrderResponseDto;
+import ecommerce_backend.orderservice.model.Order;
+import ecommerce_backend.orderservice.model.OrderEnum;
+import ecommerce_backend.orderservice.model.OrderItems;
+import ecommerce_backend.productservice.entity.Product;
+import ecommerce_backend.productservice.exceptions.ProductNotExsists;
+import ecommerce_backend.productservice.repository.ProductRepository;
+import ecommerce_backend.userservice.entity.User;
+import ecommerce_backend.userservice.userrepository.UserRepository;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class OrderServiceImpl implements OrderService{
+    private UserRepository userRepository;
+    private OrderRepository orderRepository;
+    private CartRepository cartRepository;
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private ModelMapper mapper;
+    @Autowired
+    private CartItemRepository cartItemRepository;
+
+    public OrderServiceImpl(UserRepository userRepository, OrderRepository orderRepository, CartRepository cartRepository) {
+        this.userRepository = userRepository;
+        this.orderRepository = orderRepository;
+        this.cartRepository = cartRepository;
+    }
+
+
+    public OrderResponseDto placeOrder(OrderRequestDto dto) {
+
+        Integer totalQuantity=0;
+        Optional<Cart>exsistingCart=  cartRepository.findById(dto.getCartId());
+        if(exsistingCart.isEmpty()){
+            throw new RuntimeException("CART ID IS INVALID "+dto.getCartId());
+        }
+        BigDecimal total=BigDecimal.ZERO;
+        BigDecimal totalPrice=BigDecimal.ZERO;
+        Optional<User> userOptional=userRepository.findByEmail(dto.getEmail());
+        if(userOptional.isEmpty()){
+            throw new UserNotFoundException("USER NOT FOUND PLEASE LOGIN "+dto.getEmail());
+        }
+        Order order=new Order();
+        List<OrderItems>orderItemsList=new ArrayList<>();
+        for(CartItem items:exsistingCart.get().getCartItems()){
+            Optional<CartItem>cartItemOptional=cartItemRepository.findById(items.getId());
+            if(cartItemOptional.isEmpty()){
+                throw new RuntimeException("CART ITMS ID IS INVALID "+items.getId());
+            }
+            OrderItems item=new OrderItems();
+            Optional<Product>productOptional=productRepository.findById(items.getProductId());
+            if(productOptional.isEmpty()){
+                throw new ProductNotExsists("PRODUCT ID NOT FOUND "+ items.getProductId());
+            }
+            if(productOptional.get().getPrice().equals(cartItemOptional.get().getPrice())){
+                total=exsistingCart.get().getTotalPrice();
+            }else {
+                totalPrice=productOptional.get().getPrice().multiply(BigDecimal.valueOf(items.getQuantity()));
+                total=total.add(totalPrice);
+            }
+            item.setProduct(productOptional.get());
+            item.setQuantity(items.getQuantity());
+            orderItemsList.add(item);
+        }
+        totalQuantity=exsistingCart.get().getTotalQuantity();
+        order.setUser(userOptional.get());
+        order.setCart(exsistingCart.get());
+        order.setOrderItems(orderItemsList);
+        order.setOrderEnum(OrderEnum.ORDER_PENDING);
+        order.setTotalPrice(total);
+        order.setTotalQuantity(totalQuantity);
+        for(OrderItems items:orderItemsList){
+            items.setOrder(order);
+        }
+        orderRepository.save(order);
+        return fromOrderTiems(order);
+    }
+    private OrderResponseDto fromOrderTiems(Order  order){
+    OrderResponseDto dto=new OrderResponseDto();
+    dto.setOrderID(order.getId());
+    List<Long>productIds=new ArrayList<>();
+    dto.setUseEmail(order.getCart().getUserEmail());
+    dto.setOrderCreatedAt(order.getCreatedAt());
+    List<Long>itemsListId=new ArrayList<>();
+    for(OrderItems orderItems:order.getOrderItems()){
+        itemsListId.add(orderItems.getId());
+        productIds.add(orderItems.getProduct().getId());
+    }
+    dto.setOrderItemsIds(itemsListId);
+    dto.setProductIds(productIds);
+    dto.setUserEmail(order.getUser().getEmail());
+    dto.setTotalQuantity(order.getTotalQuantity());
+    dto.setTotalPrice(order.getTotalPrice());
+    dto.setStatus(order.getOrderEnum());
+    return dto;
+    }
+
+
+    @Override
+    public List<OrderResponseDto> getAllOrders() {
+        List<Order>orderList=orderRepository.findAll();
+        List<OrderResponseDto>responseDtos=new ArrayList<>();
+        for(Order order:orderList){
+           responseDtos.add(fromOrderTiems(order));
+        }
+        return responseDtos;
+    }
+
+    @Override
+    public boolean deleteOrder(long id) {
+       Optional<Order>order=orderRepository.findById(id);
+       if(order.isEmpty()){
+           throw new RuntimeException("ORDER ID NOT EXISTS "+id);
+       }
+       orderRepository.deleteById(id);
+        return true;
+    }
+
+    @Override
+    public String ConfirmOrder(String email) {
+        Optional<User>userOptional=userRepository.findByEmail(email);
+            if(userOptional.isEmpty()){
+                throw new UserNotFoundException("USER NOT FOUND PLEASE SIGN UP ");
+        }
+            Optional<Order>optionalOrder=orderRepository.findByUserEmail(email);
+            if(optionalOrder.isEmpty()){
+                throw new RuntimeException("PLEASE PALCE AN ORDER FIRST "+email);
+            }
+            optionalOrder.get().setOrderEnum(OrderEnum.CONFIRM_ORDER);
+          List<Order>orderList=orderRepository.findByUserId(userOptional.get().getId());
+          if(orderList.isEmpty()){
+              throw new RuntimeException("NO USER CONNECTED TO ORDER "+email);
+          }
+          userOptional.get().setOrderList(orderList);
+          userRepository.save(userOptional.get());
+          orderRepository.save(optionalOrder.get());
+
+        return optionalOrder.get().getOrderEnum().name();
+    }
+}

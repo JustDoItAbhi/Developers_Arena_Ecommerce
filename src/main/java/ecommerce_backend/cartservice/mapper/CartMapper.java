@@ -18,22 +18,44 @@ public class CartMapper {
         this.mapper = mapper;
     }
 
-    public static   CartItemResponseDto fromEntity(CartItem cartItem){
-        List<CartItemResponseDtoList>responseDto=new ArrayList<>();
-        CartItemResponseDtoList list=new CartItemResponseDtoList();
-        list.setId(cartItem.getId());
-        list.setNumberOfItemsSelected(cartItem.getQuantity());
-        list.setPrice(cartItem.getPrice());
-        list.setProductId(cartItem.getProductId());
-        list.setProductName(cartItem.getProductName());
-        responseDto.add(list);
-        CartItemResponseDto dto=new CartItemResponseDto();
-        dto.setResponseDtoLists(responseDto);
-        return dto;
-    }
-    public CartResponseDto fromCartEntity(Cart cart){
-        CartResponseDto dto=mapper.map(cart,CartResponseDto.class);
-        return dto;
+
+//    public CartResponseDto fromCartEntity(Cart cart){
+//        if (cart.getCartItems() != null && !cart.getCartItems().isEmpty()) {
+//            System.out.println("Cart has " + cart.getCartItems().size() + " items");
+//            System.out.println("First item: " + cart.getCartItems().get(0));
+//        } else {
+//            System.out.println("WARNING: Cart has totalQuantity " + cart.getTotalQuantity() +
+//                    " but cartItems is " + (cart.getCartItems() == null ? "null" : "empty"));
+//        }
+//        CartResponseDto dto=mapper.map(cart,CartResponseDto.class);
+//        System.out.println("Cart ID: " + cart.getId());
+//        System.out.println("Cart items size: " + cart.getCartItems().size());
+//        System.out.println("Cart items: " + cart.getCartItems());
+//
+//        return dto;
+//    }
+
+    public static CartResponseDto fromCartEntity(Cart cart){
+        CartResponseDto responseDto = new CartResponseDto();
+        responseDto.setUserEmail(cart.getUserEmail());
+        responseDto.setCartID(cart.getId());
+        responseDto.setTotalPrice(cart.getTotalPrice());
+        responseDto.setTotalQuantity(cart.getTotalQuantity());
+
+
+        List<CartItemResponseDtoList> list = new ArrayList<>();
+        for (CartItem item : cart.getCartItems()) {
+            CartItemResponseDtoList responseDtoList = new CartItemResponseDtoList();
+            responseDtoList.setQuantity(item.getQuantity());
+            responseDtoList.setId(item.getId());
+            responseDtoList.setPrice(item.getPrice());
+            responseDtoList.setProductName(item.getProductName());
+            responseDtoList.setProductId(item.getProductId());
+            responseDtoList.setTotal(item.getTotal());
+            list.add(responseDtoList);
+        }
+        responseDto.setCartItems(list);
+        return responseDto;
     }
 
 }

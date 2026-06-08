@@ -7,7 +7,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 @Data
 @Entity
-@Table(name="product")
+@Table(name="products")
 public class Product extends BaseModel {
     @NotBlank(message = "Product name is required")
     @Size(min = 3, max = 100)
@@ -25,5 +25,4 @@ public class Product extends BaseModel {
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
-
 }

@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -49,11 +50,18 @@ public class ProductServiceImpl implements ProductService{
         }
         newProduct.setCategory(category.get());
         Product savedProduct = productRepository.save(newProduct);
-        Category category1=category.get();
-        List<Product>productList= Arrays.asList(savedProduct);
-        category1.setProductList(productList);
 
-        categoryRepository.saveAndFlush(category.get());
+        Category category1=category.get();
+        List<Product>productList= new ArrayList<>();
+        productList.add(savedProduct);
+
+        if (category1.getProductList() != null) {
+            category1.getProductList().add(savedProduct);
+        } else {
+            category1.setProductList(productList);
+        }
+
+        categoryRepository.saveAndFlush(category1);
         ProductResponseDTO product = modelMapper.map(savedProduct, ProductResponseDTO.class);
         return product;
     }

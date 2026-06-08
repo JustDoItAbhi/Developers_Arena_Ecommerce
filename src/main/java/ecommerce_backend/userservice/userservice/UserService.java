@@ -12,4 +12,5 @@ public interface UserService {
     List<UserResponseDto>getallUsers(int page, int pageSize);
     UserResponseDto updateUser(long id, UserRequestDTO dto);
     String login(String username, String password);
+    UserResponseDto getProfile();
 }

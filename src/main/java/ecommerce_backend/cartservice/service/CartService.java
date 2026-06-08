@@ -5,10 +5,10 @@ import ecommerce_backend.cartservice.dto.*;
 import java.util.List;
 
 public interface CartService {
-   List<CartItemResponseDto> savesToDatabase(ProductCartRequestDto dto);
-    CartResponseDto addToCart(AddToCartRequest dto);
-    List<CartItemResponseDtoList>findAllCartItems();
-    String deleteCartItems(long id);
+
+    CartResponseDto addToCart(AddToOrderRequest dto);
     List<CartResponseDto> getAllCarts();
+    CartResponseDto getCartByID(long id);
+    boolean deleteCart(long id);
 
 }

@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -111,10 +112,21 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public String login(String username, String password) {
-        Authentication authentication= authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        username,password));
-            UserDetails userDetails= (UserDetails) authentication.getPrincipal();
-           return jwtService.generateToken(new HashMap<>(),userDetails);
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(username, password));
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        return jwtService.generateToken (userDetails);
+    }
+
+    @Override
+    public UserResponseDto getProfile() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+
+        // Fetch user from database
+        User user = userRepository.findByEmail(currentUsername)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+        UserResponseDto responseDto=mapper.map(user,UserResponseDto.class);
+        return responseDto;
     }
 }

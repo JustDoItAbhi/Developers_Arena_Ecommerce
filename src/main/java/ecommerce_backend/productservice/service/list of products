@@ -1,0 +1,65 @@
+[
+    {
+        "name": "Samsung Galaxy S25",
+        "description": "Latest flagship smartphone with advanced camera system",
+        "price": 1299.99,
+        "stockQuantity": 50,
+        "category": "Electronics"
+    },
+    {
+        "name": "Non-Stick Frying Pan Set",
+        "description": "Premium 3-piece non-stick cookware set",
+        "price": 89.99,
+        "stockQuantity": 120,
+        "category": "Kitchenware"
+    },
+    {
+        "name": "Men's Denim Jacket",
+        "description": "Classic blue denim jacket for casual wear",
+        "price": 74.50,
+        "stockQuantity": 80,
+        "category": "Clothing"
+    },
+    {
+        "name": "Clean Code",
+        "description": "A handbook of agile software craftsmanship by Robert C. Martin",
+        "price": 39.95,
+        "stockQuantity": 200,
+        "category": "Books"
+    },
+    {
+        "name": "Wireless Bluetooth Headphones",
+        "description": "Noise-cancelling over-ear headphones with 30-hour battery life",
+        "price": 199.99,
+        "stockQuantity": 65,
+        "category": "Electronics"
+    }
+]
+
+
+and category
+// {
+// "name": "Kitchenware",
+// "description": "Cooking and dining essentials"
+// }
+
+// {
+// "name": "Electronics",
+// "description": "Gadgets and devices"
+// }
+
+// {
+// "name": "Clothing",
+// "description": "Apparel and fashion items"
+// }
+
+// {
+// "name": "Books",
+// "description": "Printed and digital reading materials"
+// }
+
+{
+"name": "Kitchenware",
+"description": "Cooking and dining essentials"
+}
+

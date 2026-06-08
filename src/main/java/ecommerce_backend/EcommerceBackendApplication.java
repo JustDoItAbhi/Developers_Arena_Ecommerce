@@ -42,3 +42,11 @@ public class EcommerceBackendApplication {
         };
     }
 }
+// cart to add products one by one  and add into a list of productscarts ,
+// send that list of productcart to order and and calcualte total sum ,
+// to confirm order let user to login or signup and add adress ,
+// if signup confim then login and pay for order
+// if payment succesfull then show ordr details else go back ,
+// if order confimred create a database to add pending quantity of each product and store ,
+// later add scaduale and create a query to update product databse with new numbers products
+// USER SHOULD HAVE ORDER HISTORY

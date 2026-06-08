@@ -1,8 +1,9 @@
 package ecommerce_backend.cartservice.carcontroller;
 
 import ecommerce_backend.cartservice.dto.*;
-import ecommerce_backend.cartservice.entity.Cart;
 import ecommerce_backend.cartservice.service.CartService;
+import ecommerce_backend.ratelimit.RateLimit;
+import ecommerce_backend.utils.TrackPerformance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,25 +16,33 @@ public class CartController {
     @Autowired
     private CartService cartService;
 
-    @GetMapping("/save")
-    public ResponseEntity<List<CartItemResponseDto>> selectedProduct(@RequestBody ProductCartRequestDto dto){
-        return ResponseEntity.ok(cartService.savesToDatabase(dto));
-    }
+
     @PostMapping("/add")
-    public ResponseEntity<CartResponseDto> addtocart(@RequestBody AddToCartRequest dto){
+    @TrackPerformance
+    @RateLimit(value = 50,duration = 60000)
+    public ResponseEntity<CartResponseDto> addtocart(@RequestBody AddToOrderRequest dto){
         return ResponseEntity.ok(cartService.addToCart(dto));
     }
-    @GetMapping
-    public ResponseEntity<List<CartItemResponseDtoList>> getAllCartItems(){
-        return ResponseEntity.ok(cartService.findAllCartItems());
-    }
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deletetocartItme(@PathVariable("id")long id ){
-        return ResponseEntity.ok(cartService.deleteCartItems(id));
-    }
+
     @GetMapping("/")
+    @TrackPerformance
+    @RateLimit(value = 50,duration = 60000)
     public ResponseEntity<List<CartResponseDto>> getAllCartI(){
         return ResponseEntity.ok(cartService.getAllCarts());
+    }
+
+
+    @GetMapping("/{id}")
+    @TrackPerformance
+    @RateLimit(value = 50,duration = 60000)
+    public ResponseEntity<CartResponseDto> getCartById(@PathVariable("id")long id ){
+        return ResponseEntity.ok(cartService.getCartByID(id));
+    }
+    @DeleteMapping("/{id}")
+    @TrackPerformance
+    @RateLimit(value = 50,duration = 60000)
+    public ResponseEntity<Boolean>deleteCartByID(@PathVariable("id")long id){
+        return ResponseEntity.ok(cartService.deleteCart(id));
     }
 
 }
