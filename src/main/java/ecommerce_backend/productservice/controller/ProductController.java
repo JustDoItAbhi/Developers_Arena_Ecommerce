@@ -5,6 +5,9 @@ import ecommerce_backend.productservice.service.ProductService;
 import ecommerce_backend.utils.DbTimeHolder;
 import ecommerce_backend.utils.TrackPerformance;
 import ecommerce_backend.ratelimit.RateLimit;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,6 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
+@SecurityRequirement(name = "bearerAuth")
 public class ProductController {
     @Autowired
     private ProductService productService;

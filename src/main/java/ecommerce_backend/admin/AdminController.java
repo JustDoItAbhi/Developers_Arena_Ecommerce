@@ -6,6 +6,7 @@ import ecommerce_backend.ratelimit.RateLimit;
 import ecommerce_backend.userservice.userdto.response.UserResponseDto;
 import ecommerce_backend.userservice.userservice.UserService;
 import ecommerce_backend.utils.TrackPerformance;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +19,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
+@SecurityRequirement(name = "bearerAuth")
 public class AdminController {
 
     private final UserService userService;

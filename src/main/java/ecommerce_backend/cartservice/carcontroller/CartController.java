@@ -4,6 +4,7 @@ import ecommerce_backend.cartservice.dto.*;
 import ecommerce_backend.cartservice.service.CartService;
 import ecommerce_backend.ratelimit.RateLimit;
 import ecommerce_backend.utils.TrackPerformance;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/cart")
+@SecurityRequirement(name = "bearerAuth")
 public class CartController {
     @Autowired
     private CartService cartService;

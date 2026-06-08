@@ -6,6 +6,7 @@ import ecommerce_backend.categoryservice.categoryservice.CategoryService;
 import ecommerce_backend.productservice.dtos.ProductResponseDTO;
 import ecommerce_backend.ratelimit.RateLimit;
 import ecommerce_backend.utils.TrackPerformance;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/categories")
+@SecurityRequirement(name = "bearerAuth")
 public class CategoryController {
     @Autowired
     private CategoryService categoryService;

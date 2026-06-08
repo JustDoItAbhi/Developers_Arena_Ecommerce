@@ -6,6 +6,7 @@ import ecommerce_backend.userservice.userdto.request.UserRequestDTO;
 import ecommerce_backend.userservice.userdto.response.UserResponseDto;
 import ecommerce_backend.userservice.userservice.UserService;
 import ecommerce_backend.utils.TrackPerformance;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
+@SecurityRequirement(name = "bearerAuth")
 public class UserController {
     @Autowired
     private UserService userService;
