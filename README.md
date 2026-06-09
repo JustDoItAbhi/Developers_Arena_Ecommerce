@@ -24,6 +24,7 @@ This system follows a layered architecture (Controller, Service, Repository, Ent
 - **Object Mapping**: ModelMapper
 - **API Documentation**: Springdoc OpenAPI v3 (Swagger)
 - **Containerization**: Docker & Docker Compose
+- **Payment** : Stripe
 
 ---
 
@@ -320,6 +321,10 @@ CONFIRM_ORDER
 - `GET /api/admin/users` - View all registered users (Admin only)
 - `GET /api/admin/orders` - View all customer orders (Admin only)
 - `GET /api/admin/reports` - Generate analytics and sales reports (Admin only)
+
+### Payment APIs
+- `GET /pay/{id}/{email}` - Get payment link to pay 
+- `GET /pay/getDelivery/{email}/{id}` -Get delivery Status 
 
 ---
 
