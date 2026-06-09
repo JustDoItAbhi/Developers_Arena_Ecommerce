@@ -6,6 +6,7 @@ import ecommerce_backend.cartservice.entity.Cart;
 import ecommerce_backend.cartservice.entity.CartItem;
 import ecommerce_backend.categoryservice.exceptions.UserNotFoundException;
 import ecommerce_backend.orderservice.OrderRepository;
+import ecommerce_backend.orderservice.dto.OrderConfimrationDto;
 import ecommerce_backend.orderservice.dto.OrderRequestDto;
 import ecommerce_backend.orderservice.dto.OrderResponseDto;
 import ecommerce_backend.orderservice.model.Order;
@@ -54,9 +55,9 @@ public class OrderServiceImpl implements OrderService{
         BigDecimal total=BigDecimal.ZERO;
         BigDecimal totalPrice=BigDecimal.ZERO;
         Optional<User> userOptional=userRepository.findByEmail(dto.getEmail());
-        if(userOptional.isEmpty()){
-            throw new UserNotFoundException("USER NOT FOUND PLEASE LOGIN "+dto.getEmail());
-        }
+//        if(userOptional.isEmpty()){
+//            throw new UserNotFoundException("USER NOT FOUND PLEASE LOGIN "+dto.getEmail());
+//        }
         Order order=new Order();
         List<OrderItems>orderItemsList=new ArrayList<>();
         for(CartItem items:exsistingCart.get().getCartItems()){
@@ -105,7 +106,6 @@ public class OrderServiceImpl implements OrderService{
     }
     dto.setOrderItemsIds(itemsListId);
     dto.setProductIds(productIds);
-    dto.setUserEmail(order.getUser().getEmail());
     dto.setTotalQuantity(order.getTotalQuantity());
     dto.setTotalPrice(order.getTotalPrice());
     dto.setStatus(order.getOrderEnum());
@@ -134,24 +134,30 @@ public class OrderServiceImpl implements OrderService{
     }
 
     @Override
-    public String ConfirmOrder(String email) {
-        Optional<User>userOptional=userRepository.findByEmail(email);
-            if(userOptional.isEmpty()){
-                throw new UserNotFoundException("USER NOT FOUND PLEASE SIGN UP ");
-        }
-            Optional<Order>optionalOrder=orderRepository.findByUserEmail(email);
-            if(optionalOrder.isEmpty()){
-                throw new RuntimeException("PLEASE PALCE AN ORDER FIRST "+email);
-            }
-            optionalOrder.get().setOrderEnum(OrderEnum.CONFIRM_ORDER);
-          List<Order>orderList=orderRepository.findByUserId(userOptional.get().getId());
-          if(orderList.isEmpty()){
-              throw new RuntimeException("NO USER CONNECTED TO ORDER "+email);
-          }
-          userOptional.get().setOrderList(orderList);
-          userRepository.save(userOptional.get());
-          orderRepository.save(optionalOrder.get());
+    public OrderConfimrationDto ConfirmOrder(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("USER NOT FOUND PLEASE SIGN UP"));
 
-        return optionalOrder.get().getOrderEnum().name();
+        List<Order> orderList = orderRepository.findByUserId(user.getId());
+
+        if (orderList.isEmpty()) {
+            throw new RuntimeException("PLEASE PLACE AN ORDER FIRST " + email);
+        }
+        OrderConfimrationDto dto=null;
+        for(Order order:orderList){
+          dto=fromConfirmOrder(order);
+        }
+
+        return dto;
+    }
+    private OrderConfimrationDto fromConfirmOrder(Order order){
+        OrderConfimrationDto confimrationDto=new OrderConfimrationDto();
+        confimrationDto.setStatus(OrderEnum.CONFIRM_ORDER);
+        confimrationDto.setUseEmail(order.getUser().getEmail());
+        confimrationDto.setOrderCreatedAt(order.getCreatedAt());
+        confimrationDto.setOrderID(order.getId());
+        confimrationDto.setTotalQuantity(order.getTotalQuantity());
+        confimrationDto.setTotalPrice(order.getTotalPrice());
+    return confimrationDto;
     }
 }

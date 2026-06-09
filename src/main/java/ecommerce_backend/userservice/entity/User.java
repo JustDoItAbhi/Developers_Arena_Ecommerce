@@ -18,6 +18,8 @@ public class User extends BaseModel {
     private Address address;
     @Enumerated(EnumType.STRING)
     private List<Role> roles;
-    @OneToMany(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY)
     private List<Order>orderList;
 }

@@ -17,7 +17,8 @@ import java.util.List;
 public class Order extends BaseModel {
     @OneToOne
     private Cart cart;
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User user;
     @OneToMany(mappedBy = "order",fetch = FetchType.LAZY,cascade = CascadeType.ALL,orphanRemoval = true)
     private List<OrderItems> orderItems;

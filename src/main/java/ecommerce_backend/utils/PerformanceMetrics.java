@@ -11,14 +11,18 @@ public class PerformanceMetrics {
     private long apiResponseTime;
     private long databaseQueryTime;
     private String memoryUsage;
+    private String apiName;
+    private double errorTime;
+    private long numberOfActiveUsers;
 
     public void print() {
         System.out.println("\n PERFORMANCE METRICS:");
         System.out.println("• API Response Time: " + apiResponseTime + "ms average");
         System.out.println("• Database Query Time: " + databaseQueryTime + "ms average");
         System.out.println("• Memory Usage: " + memoryUsage);
-        System.out.println("• Concurrent Users: 250+ supported");
-        System.out.println("• Error Rate: 0.05%");
+        System.out.println("• API NAME : "+apiName );
+        System.out.println("• ERROR RATE : "+errorTime );
+        System.out.println("• Concurrent Users:"+numberOfActiveUsers+ "+ supported");
         System.out.println("-----------------------------------");
     }
 }

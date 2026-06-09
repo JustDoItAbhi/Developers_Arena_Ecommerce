@@ -1,6 +1,7 @@
 package ecommerce_backend.orderservice.service;
 
 import ecommerce_backend.cartservice.dto.AddToOrderRequest;
+import ecommerce_backend.orderservice.dto.OrderConfimrationDto;
 import ecommerce_backend.orderservice.dto.OrderRequestDto;
 import ecommerce_backend.orderservice.dto.OrderResponseDto;
 
@@ -10,5 +11,5 @@ public interface OrderService {
     OrderResponseDto placeOrder(OrderRequestDto dto);
     List<OrderResponseDto>getAllOrders();
     boolean deleteOrder(long id);
-    String ConfirmOrder(String email);
+    OrderConfimrationDto ConfirmOrder(String email);
 }

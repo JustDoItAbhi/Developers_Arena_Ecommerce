@@ -6,17 +6,12 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-
 @Data
-public class OrderResponseDto {
+public class OrderConfimrationDto {
     private OrderEnum status;
     private String useEmail;
     private LocalDateTime orderCreatedAt;
     private long orderID;
-    private List<Long> orderItemsIds;
-    private List<Long>productIds;
     private BigDecimal TotalPrice;
     private Integer totalQuantity;
-
-
 }

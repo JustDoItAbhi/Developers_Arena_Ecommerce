@@ -9,40 +9,62 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Aspect
 @Component
 public class PerformanceAspect {
 
     private static final Logger log = LoggerFactory.getLogger(PerformanceAspect.class);
-
+    private static final AtomicLong totalRequests = new AtomicLong();
+    private static final AtomicLong failedRequests = new AtomicLong();
+    private static final AtomicLong activeRequests = new AtomicLong();
     @Around("@annotation(TrackPerformance)")
     public Object trackPerformance(ProceedingJoinPoint joinPoint) throws Throwable {
+        activeRequests.incrementAndGet();
+        totalRequests.incrementAndGet();
         long startTime = System.nanoTime();
+        try {
+            Object result = joinPoint.proceed();
+            return result;
+        } catch (Exception e) {
+            failedRequests.incrementAndGet();
+            activeRequests.incrementAndGet();
+            throw e;
+        } finally {
+            activeRequests.decrementAndGet();
+            long endTime = System.nanoTime();
+            long responseTime =TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
+            String apiName = joinPoint.getSignature().getName();
+            Long dbQueryTime = DbTimeHolder.getDbTime();
+            long numberofUsers=activeRequests.get();
+            double errorPercentage =
+                    totalRequests.get() == 0 ? 0 :
+                            ((double) failedRequests.get() / totalRequests.get()) * 100;
+            PerformanceMetrics metrics = PerformanceMetrics.builder()
+                    .apiName(apiName)
+                    .apiResponseTime(responseTime)
+                    .databaseQueryTime(dbQueryTime != null ? dbQueryTime : 0)
+                    .memoryUsage(getMemoryUsage())
+                    .errorTime(errorPercentage)
+                    .numberOfActiveUsers(numberofUsers)
+                    .build();
 
-        Object result = joinPoint.proceed();
+            System.out.println("\n" + "=".repeat(60));
+            System.out.println("API: " + apiName);
+            System.out.println("Error Percentage: "
+                    + String.format("%.2f", errorPercentage) + "%");
+            metrics.print();
+            System.out.println("=".repeat(60));
 
-        long endTime = System.nanoTime();
-        long responseTime = TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
-
-        Long dbQueryTime = DbTimeHolder.getDbTime();
-
-        PerformanceMetrics metrics = PerformanceMetrics.builder()
-                .apiResponseTime(responseTime)
-                .databaseQueryTime(dbQueryTime != null ? dbQueryTime : 0)
-                .memoryUsage(getMemoryUsage())
-                .build();
-
-        System.out.println("\n" + "=".repeat(60));
-        System.out.println("PERFORMANCE METRICS START");
-        System.out.println("=".repeat(60));
-        metrics.print();
-        System.out.println("=".repeat(60));
-        System.out.println("PERFORMANCE METRICS END");
-        System.out.println("=".repeat(60) + "\n");
-        log.info("Performance Metrics - API: {}ms, DB: {}ms, Memory: {}",
-                responseTime, dbQueryTime, getMemoryUsage());
-        return result;
+            log.info(
+                    "API: {}, Response: {}ms, DB: {}ms, Error Rate: {}%",
+                    apiName,
+                    responseTime,
+                    dbQueryTime,
+                    String.format("%.2f", errorPercentage)
+            );
+        }
     }
 
     private String getMemoryUsage() {

@@ -1,6 +1,7 @@
 package ecommerce_backend.orderservice.controller;
 
 import ecommerce_backend.cartservice.dto.AddToOrderRequest;
+import ecommerce_backend.orderservice.dto.OrderConfimrationDto;
 import ecommerce_backend.orderservice.dto.OrderRequestDto;
 import ecommerce_backend.orderservice.dto.OrderResponseDto;
 import ecommerce_backend.orderservice.dto.orderitemdto.ConfirmOrderDto;
@@ -29,7 +30,7 @@ public class OrderController {
     @GetMapping("/confirm")
     @TrackPerformance
     @RateLimit(value = 50,duration = 60000)
-    public ResponseEntity<String>placeOrder(@RequestBody ConfirmOrderDto dto){
+    public ResponseEntity<OrderConfimrationDto>placeOrder(@RequestBody ConfirmOrderDto dto){
         return ResponseEntity.ok(orderService.ConfirmOrder(dto.getEmail()));
     }
     @GetMapping
