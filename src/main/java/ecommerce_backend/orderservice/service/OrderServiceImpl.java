@@ -1,10 +1,12 @@
 package ecommerce_backend.orderservice.service;
 
+import ecommerce_backend.OrderNotFoundEx;
 import ecommerce_backend.cartservice.cartrepository.CartItemRepository;
 import ecommerce_backend.cartservice.cartrepository.CartRepository;
 import ecommerce_backend.cartservice.entity.Cart;
 import ecommerce_backend.cartservice.entity.CartItem;
 import ecommerce_backend.categoryservice.exceptions.UserNotFoundException;
+import ecommerce_backend.exceptions.CartNotFoundException;
 import ecommerce_backend.orderservice.OrderRepository;
 import ecommerce_backend.orderservice.dto.OrderConfimrationDto;
 import ecommerce_backend.orderservice.dto.OrderRequestDto;
@@ -13,7 +15,7 @@ import ecommerce_backend.orderservice.model.Order;
 import ecommerce_backend.orderservice.model.OrderEnum;
 import ecommerce_backend.orderservice.model.OrderItems;
 import ecommerce_backend.productservice.entity.Product;
-import ecommerce_backend.productservice.exceptions.ProductNotExsists;
+import ecommerce_backend.exceptions.ProductNotExsists;
 import ecommerce_backend.productservice.repository.ProductRepository;
 import ecommerce_backend.userservice.entity.User;
 import ecommerce_backend.userservice.userrepository.UserRepository;
@@ -50,7 +52,7 @@ public class OrderServiceImpl implements OrderService{
         Integer totalQuantity=0;
         Optional<Cart>exsistingCart=  cartRepository.findById(dto.getCartId());
         if(exsistingCart.isEmpty()){
-            throw new RuntimeException("CART ID IS INVALID "+dto.getCartId());
+            throw new CartNotFoundException("CART ID IS INVALID "+dto.getCartId());
         }
         BigDecimal total=BigDecimal.ZERO;
         BigDecimal totalPrice=BigDecimal.ZERO;
@@ -63,7 +65,7 @@ public class OrderServiceImpl implements OrderService{
         for(CartItem items:exsistingCart.get().getCartItems()){
             Optional<CartItem>cartItemOptional=cartItemRepository.findById(items.getId());
             if(cartItemOptional.isEmpty()){
-                throw new RuntimeException("CART ITMS ID IS INVALID "+items.getId());
+                throw new CartNotFoundException("CART ITMS ID IS INVALID "+items.getId());
             }
             OrderItems item=new OrderItems();
             Optional<Product>productOptional=productRepository.findById(items.getProductId());
@@ -127,7 +129,7 @@ public class OrderServiceImpl implements OrderService{
     public boolean deleteOrder(long id) {
        Optional<Order>order=orderRepository.findById(id);
        if(order.isEmpty()){
-           throw new RuntimeException("ORDER ID NOT EXISTS "+id);
+           throw new OrderNotFoundEx("ORDER ID NOT EXISTS "+id);
        }
        orderRepository.deleteById(id);
         return true;
@@ -141,7 +143,7 @@ public class OrderServiceImpl implements OrderService{
         List<Order> orderList = orderRepository.findByUserId(user.getId());
 
         if (orderList.isEmpty()) {
-            throw new RuntimeException("PLEASE PLACE AN ORDER FIRST " + email);
+            throw new OrderNotFoundEx("PLEASE PLACE AN ORDER FIRST " + email);
         }
         OrderConfimrationDto dto=null;
         for(Order order:orderList){

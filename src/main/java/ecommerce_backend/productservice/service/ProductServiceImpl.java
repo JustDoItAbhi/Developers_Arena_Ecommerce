@@ -4,7 +4,7 @@ import ecommerce_backend.categoryservice.exceptions.CategoryNotFoundException;
 import ecommerce_backend.productservice.dtos.*;
 import ecommerce_backend.productservice.entity.Category;
 import ecommerce_backend.productservice.entity.Product;
-import ecommerce_backend.productservice.exceptions.ProductNotExsists;
+import ecommerce_backend.exceptions.ProductNotExsists;
 import ecommerce_backend.categoryservice.categoryrepository.CategoryRepository;
 import ecommerce_backend.productservice.repository.ProductRepository;
 import ecommerce_backend.productservice.service.filters.ProductSpecifications;
@@ -17,7 +17,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 

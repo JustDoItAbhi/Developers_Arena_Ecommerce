@@ -1,13 +1,10 @@
-package ecommerce_backend.productservice.exceptions;
+package ecommerce_backend.exceptions;
 
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
 @Data
 @Builder

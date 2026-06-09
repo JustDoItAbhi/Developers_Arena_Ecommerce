@@ -1,4 +1,4 @@
-package ecommerce_backend.productservice.exceptions;
+package ecommerce_backend.exceptions;
 
 public class ProductNotExsists extends RuntimeException{
     public ProductNotExsists() {

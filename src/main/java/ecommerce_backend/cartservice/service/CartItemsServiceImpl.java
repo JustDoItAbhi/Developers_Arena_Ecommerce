@@ -8,6 +8,7 @@ import ecommerce_backend.cartservice.dto.ProductCartRequestDto;
 import ecommerce_backend.cartservice.entity.CartItem;
 import ecommerce_backend.cartservice.mapper.CartItemMapper;
 import ecommerce_backend.cartservice.mapper.CartMapper;
+import ecommerce_backend.exceptions.CartNotFoundException;
 import ecommerce_backend.productservice.entity.Product;
 import ecommerce_backend.productservice.repository.ProductRepository;
 import org.modelmapper.ModelMapper;
@@ -37,7 +38,7 @@ public class CartItemsServiceImpl implements CartItemsService{
             for(Product product : products) {
                 Optional<CartItem> existingCartItem = cartItemRepository.findByProductId(product.getId());
                 if(existingCartItem.isPresent()) {
-                    throw new RuntimeException("Cart already exists for product: " + product.getId());
+                    throw new CartNotFoundException("Cart already exists for product: " + product.getId());
                 }
 
                 CartItem newCartItem = new CartItem();
@@ -72,7 +73,7 @@ public class CartItemsServiceImpl implements CartItemsService{
     @Override
     public String deleteCartItems(long id) {
         CartItem item=cartItemRepository.findById(id).orElseThrow(
-                ()->new RuntimeException("cart not found "+ id));
+                ()->new CartNotFoundException("cart not found "+ id));
         cartItemRepository.deleteById(id);
 
         return "deleted"+id;

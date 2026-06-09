@@ -1,6 +1,6 @@
 package ecommerce_backend.categoryservice.exceptions;
 
-import ecommerce_backend.productservice.exceptions.ExceptionError;
+import ecommerce_backend.exceptions.ExceptionError;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

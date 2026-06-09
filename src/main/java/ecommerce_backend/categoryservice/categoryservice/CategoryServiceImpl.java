@@ -3,6 +3,7 @@ package ecommerce_backend.categoryservice.categoryservice;
 import ecommerce_backend.categoryservice.categorydto.CategoryRequestDto;
 import ecommerce_backend.categoryservice.categorydto.CategoryResponseDto;
 import ecommerce_backend.categoryservice.categoryrepository.CategoryRepository;
+import ecommerce_backend.categoryservice.exceptions.CategoryNotFoundException;
 import ecommerce_backend.productservice.dtos.ProductResponseDTO;
 import ecommerce_backend.productservice.entity.Category;
 import ecommerce_backend.productservice.entity.Product;
@@ -44,7 +45,7 @@ public class CategoryServiceImpl implements CategoryService{
     @Override
     public CategoryResponseDto findById(long id) {
         Category category=categoryRepository.findById(id).orElseThrow(
-                ()->new RuntimeException("no such category exists "+ id));
+                ()->new CategoryNotFoundException("no such category exists "+ id));
         CategoryResponseDto responseDto=mapper.map(category,CategoryResponseDto.class);
         return responseDto;
     }
@@ -52,7 +53,7 @@ public class CategoryServiceImpl implements CategoryService{
     @Override
     public boolean deleteCategory(long id) {
         Category category=categoryRepository.findById(id).orElseThrow(
-                ()->new RuntimeException("no such category exists "+ id));
+                ()->new CategoryNotFoundException("no such category exists "+ id));
         List<Product>product=productRepository.findByCategoryId(category.getId());
       productRepository.deleteAll(product);
         categoryRepository.deleteById(id);
@@ -73,7 +74,7 @@ public class CategoryServiceImpl implements CategoryService{
     @Override
     public CategoryResponseDto updateCategory(long id, CategoryRequestDto dto) {
         Category category=categoryRepository.findById(id).orElseThrow(
-                ()->new RuntimeException("no such category exists "+ id));
+                ()->new CategoryNotFoundException("no such category exists "+ id));
        Category cat=category;
        cat.setName(dto.getName());
        cat.setDescription(dto.getDescription());
@@ -84,7 +85,7 @@ public class CategoryServiceImpl implements CategoryService{
     @Override
     public List<ProductResponseDTO> getAllProductByCategoryid(long categoryId) {
         Category category=categoryRepository.findById(categoryId).orElseThrow(
-                ()->new RuntimeException("no such category exists "+ categoryId));
+                ()->new CategoryNotFoundException("no such category exists "+ categoryId));
         List<ProductResponseDTO>responseDTOS=new ArrayList<>();
         for(Product c:category.getProductList()){
             responseDTOS.add(mapper.map(c,ProductResponseDTO.class));

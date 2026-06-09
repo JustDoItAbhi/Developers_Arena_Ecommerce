@@ -8,6 +8,8 @@ import ecommerce_backend.cartservice.entity.CartItem;
 
 import ecommerce_backend.cartservice.mapper.CartMapper;
 import ecommerce_backend.categoryservice.exceptions.UserNotFoundException;
+import ecommerce_backend.exceptions.CartNotFoundException;
+import ecommerce_backend.exceptions.ProductNotExsists;
 import ecommerce_backend.productservice.entity.Product;
 import ecommerce_backend.productservice.repository.ProductRepository;
 import ecommerce_backend.userservice.entity.User;
@@ -53,11 +55,11 @@ public CartResponseDto addToCart(AddToOrderRequest dto) {
     for (CartRequestDtoList item : dto.getCartRequestDtoLists()) {
         Optional<CartItem>cartItem=cartItemRepository.findById(item.getCartItemId());
         if(cartItem.isEmpty()){
-            throw new RuntimeException("CART ITEM ID IS NULL "+item.getCartItemId());
+            throw new CartNotFoundException("CART ITEM ID IS NULL "+item.getCartItemId());
         }
         Optional<Product>product=productRepository.findById(item.getProductId());
         if(product.isEmpty()){
-            throw new RuntimeException("PRODUCT ID IS NULL "+item.getCartItemId());
+            throw new ProductNotExsists("PRODUCT ID IS NULL "+item.getCartItemId());
         }
         CartItem cartItem1=cartItem.get();
         System.out.println("ITEMS Q "+item.getQuantity());
@@ -108,7 +110,7 @@ public CartResponseDto addToCart(AddToOrderRequest dto) {
     @Override
     public CartResponseDto getCartByID(long id) {
         Cart cart=cartRepository.findById(id).orElseThrow(
-                ()->new RuntimeException("CART NOT FOUND "+ id));
+                ()->new CartNotFoundException("CART NOT FOUND "+ id));
         CartResponseDto dto=CartMapper.fromCartEntity(cart);
 
         return dto;
