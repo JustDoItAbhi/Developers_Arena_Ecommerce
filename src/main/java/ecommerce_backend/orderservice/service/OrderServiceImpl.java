@@ -25,8 +25,10 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class OrderServiceImpl implements OrderService{
@@ -40,6 +42,9 @@ public class OrderServiceImpl implements OrderService{
     @Autowired
     private CartItemRepository cartItemRepository;
 
+    ConcurrentHashMap <String,OrderResponseDto>orderResponseDtoHashMap=new ConcurrentHashMap<>();
+    ConcurrentHashMap <String,OrderConfimrationDto>orderConfirmation=new ConcurrentHashMap<>();
+
     public OrderServiceImpl(UserRepository userRepository, OrderRepository orderRepository, CartRepository cartRepository) {
         this.userRepository = userRepository;
         this.orderRepository = orderRepository;
@@ -48,7 +53,9 @@ public class OrderServiceImpl implements OrderService{
 
 
     public OrderResponseDto placeOrder(OrderRequestDto dto) {
-
+        if(orderResponseDtoHashMap.containsKey(dto.getEmail())){
+            return orderResponseDtoHashMap.get(dto.getEmail());
+        }
         Integer totalQuantity=0;
         Optional<Cart>exsistingCart=  cartRepository.findById(dto.getCartId());
         if(exsistingCart.isEmpty()){
@@ -93,6 +100,7 @@ public class OrderServiceImpl implements OrderService{
             items.setOrder(order);
         }
         orderRepository.save(order);
+        orderResponseDtoHashMap.put(order.getUser().getEmail(),fromOrderTiems(order));
         return fromOrderTiems(order);
     }
     private OrderResponseDto fromOrderTiems(Order  order){
@@ -117,11 +125,15 @@ public class OrderServiceImpl implements OrderService{
 
     @Override
     public List<OrderResponseDto> getAllOrders() {
+        if (!orderResponseDtoHashMap.isEmpty()) {
+            return new ArrayList<>(orderResponseDtoHashMap.values());
+        }
         List<Order>orderList=orderRepository.findAll();
         List<OrderResponseDto>responseDtos=new ArrayList<>();
         for(Order order:orderList){
            responseDtos.add(fromOrderTiems(order));
         }
+
         return responseDtos;
     }
 
@@ -137,6 +149,9 @@ public class OrderServiceImpl implements OrderService{
 
     @Override
     public OrderConfimrationDto ConfirmOrder(String email) {
+        if(orderConfirmation.containsKey(email)){
+            return orderConfirmation.get(email);
+        }
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("USER NOT FOUND PLEASE SIGN UP"));
 
@@ -149,7 +164,7 @@ public class OrderServiceImpl implements OrderService{
         for(Order order:orderList){
           dto=fromConfirmOrder(order);
         }
-
+        orderConfirmation.put(email,dto);
         return dto;
     }
     private OrderConfimrationDto fromConfirmOrder(Order order){

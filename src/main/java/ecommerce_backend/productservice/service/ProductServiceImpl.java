@@ -1,6 +1,7 @@
 package ecommerce_backend.productservice.service;
 
 import ecommerce_backend.categoryservice.exceptions.CategoryNotFoundException;
+import ecommerce_backend.orderservice.dto.OrderResponseDto;
 import ecommerce_backend.productservice.dtos.*;
 import ecommerce_backend.productservice.entity.Category;
 import ecommerce_backend.productservice.entity.Product;
@@ -11,6 +12,7 @@ import ecommerce_backend.productservice.service.filters.ProductSpecifications;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class ProductServiceImpl implements ProductService{
@@ -29,9 +32,14 @@ public class ProductServiceImpl implements ProductService{
     @Autowired
     private CategoryRepository categoryRepository;
 
+    ConcurrentHashMap <String, ProductResponseDTO>productMap=new ConcurrentHashMap<>();
 
     @Override
     public ProductResponseDTO createProduct(ProductDTO dto) {
+        if(productMap.containsKey(dto.getName())){
+            return productMap.get(dto.getName());
+        }
+
         Optional<Product> productid=productRepository.findByName(dto.getName());
         if(productid.isPresent()) {
                ProductResponseDTO responseDTO=modelMapper.map(productid.get(),ProductResponseDTO.class);
@@ -62,11 +70,23 @@ public class ProductServiceImpl implements ProductService{
 
         categoryRepository.saveAndFlush(category1);
         ProductResponseDTO product = modelMapper.map(savedProduct, ProductResponseDTO.class);
+        productMap.put(newProduct.getName(),product);
         return product;
     }
 
     @Override
     public Page<ProductResponseDTO> getAllProducts(int page, int size) {
+        if (!productMap.isEmpty()) {
+            List<ProductResponseDTO> products =
+                    new ArrayList<>(productMap.values());
+
+            return new PageImpl<>(
+                    products,
+                    PageRequest.of(page, size),
+                    products.size()
+            );
+        }
+
         Pageable pageable= PageRequest.of(page,size);
        Page<Product>productList= productRepository.findAll(pageable);
        Page<ProductResponseDTO>responseDTOS=productList.map(product->
@@ -114,7 +134,9 @@ public class ProductServiceImpl implements ProductService{
             product.setCategory(category);
             categoryRepository.save(category);
         }
-        return modelMapper.map(product,ProductResponseDTO.class);
+        ProductResponseDTO responseDTO=modelMapper.map(product,ProductResponseDTO.class);
+        productMap.put(dto.getName(),responseDTO);
+        return responseDTO;
     }
 
     @Override

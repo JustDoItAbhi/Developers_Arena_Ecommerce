@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Transactional
@@ -34,13 +35,18 @@ public class CartServiceImpl implements CartService{
     @Autowired
     private CartItemRepository cartItemRepository;
 
-
 @Autowired
 private UserRepository userRepository;
 
+ConcurrentHashMap<String ,CartResponseDto>cartMap=new ConcurrentHashMap<>();
 
 @Override
 public CartResponseDto addToCart(AddToOrderRequest dto) {
+    if(cartMap.containsKey(dto.getUserEmail())){
+        return cartMap.get(dto.getUserEmail());
+    }
+
+
         Optional<User>userOptional=userRepository.findByEmail(dto.getUserEmail());
         if(userOptional.isEmpty()){
             throw new UserNotFoundException("PLEASE SIGN UP :: "+ dto.getUserEmail());
@@ -62,17 +68,13 @@ public CartResponseDto addToCart(AddToOrderRequest dto) {
             throw new ProductNotExsists("PRODUCT ID IS NULL "+item.getCartItemId());
         }
         CartItem cartItem1=cartItem.get();
-        System.out.println("ITEMS Q "+item.getQuantity());
-        System.out.println("ITEMS PID "+item.getProductId());
-        System.out.println("ITEMS CARTiD "+item.getCartItemId());
         totalPrice=cartItem1.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
          totalQuantity+=item.getQuantity();
         total=total.add(totalPrice);
          cartItem1.setQuantity(item.getQuantity());
         cartItem1.setTotal(totalPrice);
-        System.out.println("PRODUCT PRICE ::: "+ product.get().getPrice());
-        System.out.println("CART ITME QUANTITY ::: "+ item.getQuantity());
         cartItemRepository.save(cartItem1);
+
         cartItemList.add(cartItem1);
     }
 
@@ -87,14 +89,19 @@ public CartResponseDto addToCart(AddToOrderRequest dto) {
     cart.setUserEmail(userOptional.get().getEmail());
     Cart savedCart = cartRepository.save(cart);
 
-    System.out.println("CART ID :::: "+savedCart.getId());
-    return CartMapper.fromCartEntity(savedCart);
+    CartResponseDto responseDto=CartMapper.fromCartEntity(savedCart);
+
+    cartMap.put(cart.getUserEmail(),responseDto);
+    return responseDto;
 }
 
 
 
     @Override
     public List<CartResponseDto> getAllCarts() {
+    if(cartMap.size()!=0){
+        return new ArrayList<>(cartMap.values());
+    }
         List<Cart>cartList=cartRepository.findAll();
         List<CartResponseDto>responseDtos=new ArrayList<>();
         for(Cart cart:cartList){

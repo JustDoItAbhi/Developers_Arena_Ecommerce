@@ -4,6 +4,7 @@ import ecommerce_backend.categoryservice.categorydto.CategoryRequestDto;
 import ecommerce_backend.categoryservice.categorydto.CategoryResponseDto;
 import ecommerce_backend.categoryservice.categoryrepository.CategoryRepository;
 import ecommerce_backend.categoryservice.exceptions.CategoryNotFoundException;
+import ecommerce_backend.orderservice.dto.OrderResponseDto;
 import ecommerce_backend.productservice.dtos.ProductResponseDTO;
 import ecommerce_backend.productservice.entity.Category;
 import ecommerce_backend.productservice.entity.Product;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class CategoryServiceImpl implements CategoryService{
@@ -27,8 +29,14 @@ public class CategoryServiceImpl implements CategoryService{
     private ProductRepository productRepository;
     @Autowired
     private ModelMapper mapper;
+    ConcurrentHashMap<String, CategoryResponseDto> categoryMap=new ConcurrentHashMap<>();
+
     @Override
     public CategoryResponseDto createCategory(CategoryRequestDto dto) {
+        if(categoryMap.containsKey(dto.getName())){
+            return categoryMap.get(dto.getName());
+        }
+
         Optional<Category>exsistingCategory=categoryRepository.findByName(dto.getName());
         if(exsistingCategory.isPresent()){
             CategoryResponseDto responseDto=mapper.map(exsistingCategory.get(),CategoryResponseDto.class);
@@ -39,11 +47,15 @@ public class CategoryServiceImpl implements CategoryService{
         category.setDescription(dto.getDescription());
         categoryRepository.save(category);
         CategoryResponseDto categoryResponseDto=mapper.map(category,CategoryResponseDto.class);
+        categoryMap.put(category.getName(),categoryResponseDto);
+
         return categoryResponseDto;
     }
 
     @Override
     public CategoryResponseDto findById(long id) {
+
+
         Category category=categoryRepository.findById(id).orElseThrow(
                 ()->new CategoryNotFoundException("no such category exists "+ id));
         CategoryResponseDto responseDto=mapper.map(category,CategoryResponseDto.class);
@@ -62,6 +74,9 @@ public class CategoryServiceImpl implements CategoryService{
 
     @Override
     public List<CategoryResponseDto> findAllCategories(int page, int pageSize) {
+        if(categoryMap.size()!=0){
+            return new ArrayList<>(categoryMap.values());
+        }
         Pageable pageable= PageRequest.of(page,pageSize);
         Page<Category> categories=categoryRepository.findAll(pageable);
         List<CategoryResponseDto>responseDtos=new ArrayList<>();
@@ -79,11 +94,15 @@ public class CategoryServiceImpl implements CategoryService{
        cat.setName(dto.getName());
        cat.setDescription(dto.getDescription());
        CategoryResponseDto responseDto=mapper.map(cat,CategoryResponseDto.class);
+       categoryRepository.save(cat);
+        categoryMap.put(category.getName(),responseDto);
         return responseDto;
     }
 
     @Override
     public List<ProductResponseDTO> getAllProductByCategoryid(long categoryId) {
+
+
         Category category=categoryRepository.findById(categoryId).orElseThrow(
                 ()->new CategoryNotFoundException("no such category exists "+ categoryId));
         List<ProductResponseDTO>responseDTOS=new ArrayList<>();
